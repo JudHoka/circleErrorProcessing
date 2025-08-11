@@ -79,7 +79,6 @@ def find_center_circle(
 
     return cx, cy, radius, mm_per_pixel
 
-
 if __name__ == "__main__":
     result = find_center_circle()
     if result:
