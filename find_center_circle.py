@@ -1,5 +1,4 @@
 from pathlib import Path
-
 import cv2
 import numpy as np
 
@@ -185,7 +184,6 @@ def compute_offsets(
 
     return results
 
-
 if __name__ == "__main__":
     result = find_center_circle()
     if result:
@@ -196,7 +194,7 @@ if __name__ == "__main__":
                 x * mm_per_pixel, y * mm_per_pixel, r * mm_per_pixel
             )
         )
-
+        
         gray_all = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         circles = detect_all_circles(gray_all, mm_per_pixel)
         if circles is not None:
@@ -216,7 +214,7 @@ if __name__ == "__main__":
                 print(f"Saved offsets to {excel_path}")
             else:
                 print("pandas not installed; skipping Excel export")
-
+                
         draw_grid(img, (x, y), mm_per_pixel)
         output_dir = Path.home() / "downloads"
         output_dir.mkdir(parents=True, exist_ok=True)
