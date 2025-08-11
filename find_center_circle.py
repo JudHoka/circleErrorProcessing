@@ -91,4 +91,3 @@ if __name__ == "__main__":
         print(f"Center circle: x={x}, y={y}, radius={r}")
     else:
         print("No circles detected")
-
