@@ -210,8 +210,15 @@ if __name__ == "__main__":
                 output_dir = Path.home() / "downloads"
                 output_dir.mkdir(parents=True, exist_ok=True)
                 excel_path = output_dir / "circle_offsets.xlsx"
-                df.to_excel(excel_path, index=False)
-                print(f"Saved offsets to {excel_path}")
+                try:
+                    df.to_excel(excel_path, index=False)
+                    print(f"Saved offsets to {excel_path}")
+                except ImportError:
+                    csv_path = output_dir / "circle_offsets.csv"
+                    df.to_csv(csv_path, index=False)
+                    print(
+                        f"openpyxl not installed; saved offsets to {csv_path}"
+                    )
             else:
                 print("pandas not installed; skipping Excel export")
                 
