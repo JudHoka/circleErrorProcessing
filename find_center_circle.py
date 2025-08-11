@@ -2,11 +2,15 @@ import cv2
 import numpy as np
 
 
-def find_center_circle(image_path: str = "IMG_9503.JPG") -> tuple[int, int, int] | None:
+def find_center_circle(
+    image_path: str = "IMG_9503.JPG", physical_size_mm: float = 148.0
+) -> tuple[int, int, int, float] | None:
     """Estimate the circle around the image midpoint by scanning for edges.
 
-    The function crops a small window around the image midpoint and searches it
-    for circles. The circle nearest the window's center is selected, and its
+    The image is first cropped to a square using the smaller dimension so that
+    the physical scale (in millimetres) can be derived from the provided
+    ``physical_size_mm``. A small window around the midpoint is then searched
+    for circles. The circle nearest that window's center is selected, and its
     radius is refined by scanning outward from the detected center until a
     strong intensity change (edge) is encountered.
 
@@ -14,11 +18,15 @@ def find_center_circle(image_path: str = "IMG_9503.JPG") -> tuple[int, int, int]
     ----------
     image_path: str
         Path to the image containing circles.
+    physical_size_mm: float
+        The physical size of the square image in millimetres. This allows the
+        function to report the pixel-to-millimetre scale.
 
     Returns
     -------
-    tuple[int, int, int] | None
-        (x, y, radius) of the detected circle, or ``None`` if not found.
+    tuple[int, int, int, float] | None
+        (x, y, radius, mm_per_pixel) of the detected circle, or ``None`` if not
+        found.
     """
 
     # Load grayscale image
@@ -26,7 +34,14 @@ def find_center_circle(image_path: str = "IMG_9503.JPG") -> tuple[int, int, int]
     if img is None:
         raise FileNotFoundError(f"{image_path} not found")
 
+    # Crop to central square so physical scaling is consistent
     h, w = img.shape
+    size = min(h, w)
+    x_offset = (w - size) // 2
+    y_offset = (h - size) // 2
+    img = img[y_offset : y_offset + size, x_offset : x_offset + size]
+    h = w = size
+
     cx0, cy0 = w // 2, h // 2
 
     # Focus on a small region around the image center to avoid picking edge circles
@@ -52,42 +67,28 @@ def find_center_circle(image_path: str = "IMG_9503.JPG") -> tuple[int, int, int]
     # Choose the circle closest to the ROI center
     circles = np.round(circles[0]).astype(int)
     roi_center = np.array([roi.shape[1] // 2, roi.shape[0] // 2])
-    cx, cy, _ = min(
+    cx, cy, r = min(
         circles, key=lambda c: np.linalg.norm(c[:2] - roi_center)
     )
     cx += x1
     cy += y1
+    radius = int(r)
 
-    # Use intensity scanning from the detected center to refine the radius
-    blurred = cv2.GaussianBlur(img, (5, 5), 0)
-    center_val = int(blurred[cy, cx])
+    # Calculate pixel-to-mm scale for the cropped square
+    mm_per_pixel = physical_size_mm / size
 
-    def scan_from_center(dx: int, dy: int, threshold: int = 40) -> int:
-        x, y, dist = cx, cy, 0
-        while 0 <= x + dx < w and 0 <= y + dy < h:
-            x += dx
-            y += dy
-            dist += 1
-            if abs(int(blurred[y, x]) - center_val) > threshold:
-                break
-        return dist
-
-    left = scan_from_center(-1, 0)
-    right = scan_from_center(1, 0)
-    up = scan_from_center(0, -1)
-    down = scan_from_center(0, 1)
-
-    if min(left, right, up, down) == 0:
-        return None
-
-    radius = int(round((left + right + up + down) / 4))
-    return cx, cy, radius
-
+    return cx, cy, radius, mm_per_pixel
 
 if __name__ == "__main__":
     result = find_center_circle()
     if result:
-        x, y, r = result
-        print(f"Center circle: x={x}, y={y}, radius={r}")
+        x, y, r, mm_per_pixel = result
+        print(f"Center circle: x={x}, y={y}, radius={r} pixels")
+        print(
+            "Center circle (mm): x={:.2f}, y={:.2f}, radius={:.2f}".format(
+                x * mm_per_pixel, y * mm_per_pixel, r * mm_per_pixel
+            )
+        )
     else:
         print("No circles detected")
+
