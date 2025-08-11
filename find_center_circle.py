@@ -110,6 +110,80 @@ def draw_grid(
         cv2.line(img, (0, y), (w, y), (0, 255, 0), 1)
 
 
+def detect_all_circles(
+    gray: np.ndarray, mm_per_pixel: float, cell_mm: float = 4.0
+) -> np.ndarray | None:
+    """Detect all circles in ``gray`` using Hough transform.
+
+    Parameters
+    ----------
+    gray: numpy.ndarray
+        Grayscale image containing the circle grid.
+    mm_per_pixel: float
+        Millimetres represented by a single pixel.
+    cell_mm: float
+        Expected spacing between circle centres.
+    """
+
+    cell_px = cell_mm / mm_per_pixel
+    expected_r_px = (1.5) / mm_per_pixel  # 3 mm diameter -> 1.5 mm radius
+
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    circles = cv2.HoughCircles(
+        blur,
+        cv2.HOUGH_GRADIENT,
+        dp=1.2,
+        minDist=int(cell_px * 0.8),
+        param1=100,
+        param2=30,
+        minRadius=int(expected_r_px * 0.7),
+        maxRadius=int(expected_r_px * 1.3),
+    )
+
+    if circles is not None:
+        return np.round(circles[0]).astype(int)
+    return None
+
+
+def compute_offsets(
+    circles: np.ndarray,
+    center: tuple[int, int],
+    mm_per_pixel: float,
+    cell_mm: float = 4.0,
+) -> list[dict[str, float | str | int]]:
+    """Compute positional offsets of circles from their ideal grid points."""
+
+    cx, cy = center
+    cell_px = cell_mm / mm_per_pixel
+
+    results: list[dict[str, float | str | int]] = []
+    for x, y, _ in circles:
+        dx_mm = (x - cx) * mm_per_pixel
+        dy_mm = (y - cy) * mm_per_pixel
+
+        gx = round(dx_mm / cell_mm)
+        gy = round(dy_mm / cell_mm)
+
+        expected_x = cx + gx * cell_px
+        expected_y = cy + gy * cell_px
+
+        offset_x = (x - expected_x) * mm_per_pixel
+        offset_y = (y - expected_y) * mm_per_pixel
+
+        label = "CENTER" if gx == 0 and gy == 0 else f"{gx},{gy}"
+
+        results.append(
+            {
+                "circle": label,
+                "grid_x": gx,
+                "grid_y": gy,
+                "offset_x_mm": offset_x,
+                "offset_y_mm": offset_y,
+            }
+        )
+
+    return results
+
 if __name__ == "__main__":
     result = find_center_circle()
     if result:
@@ -120,7 +194,27 @@ if __name__ == "__main__":
                 x * mm_per_pixel, y * mm_per_pixel, r * mm_per_pixel
             )
         )
+        
+        gray_all = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        circles = detect_all_circles(gray_all, mm_per_pixel)
+        if circles is not None:
+            offsets = compute_offsets(circles, (x, y), mm_per_pixel)
 
+            try:
+                import pandas as pd
+            except ImportError:
+                pd = None
+
+            if pd is not None:
+                df = pd.DataFrame(offsets)
+                output_dir = Path.home() / "downloads"
+                output_dir.mkdir(parents=True, exist_ok=True)
+                excel_path = output_dir / "circle_offsets.xlsx"
+                df.to_excel(excel_path, index=False)
+                print(f"Saved offsets to {excel_path}")
+            else:
+                print("pandas not installed; skipping Excel export")
+                
         draw_grid(img, (x, y), mm_per_pixel)
         output_dir = Path.home() / "downloads"
         output_dir.mkdir(parents=True, exist_ok=True)
