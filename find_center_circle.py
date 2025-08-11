@@ -37,7 +37,7 @@ def find_center_circle(image_path: str = "IMG_9503.JPG") -> tuple[int, int, int]
 
     if circles is None:
         return None
-
+      
     circles = np.round(circles[0, :]).astype("int")
     h, w = gray.shape[:2]
     image_center = np.array([w // 2, h // 2])
@@ -57,4 +57,3 @@ if __name__ == "__main__":
         print(f"Center circle: x={x}, y={y}, radius={r}")
     else:
         print("No circles detected")
-
