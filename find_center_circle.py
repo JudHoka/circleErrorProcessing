@@ -133,11 +133,11 @@ def detect_all_circles(
         blur,
         cv2.HOUGH_GRADIENT,
         dp=1.2,
-        minDist=int(cell_px * 0.8),
+        minDist=int(cell_px * 0.6),
         param1=100,
-        param2=30,
-        minRadius=int(expected_r_px * 0.7),
-        maxRadius=int(expected_r_px * 1.3),
+        param2=25,
+        minRadius=int(expected_r_px * 0.6),
+        maxRadius=int(expected_r_px * 1.4),
     )
 
     if circles is not None:
