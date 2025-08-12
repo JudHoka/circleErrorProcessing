@@ -27,7 +27,7 @@ def detect_ellipses(
     expected_d_px = expected_r_px * 2
 
     blur = cv2.GaussianBlur(gray, (9, 9), 0)
-    edges = cv2.Canny(blur, 50, 150)
+    edges = cv2.Canny(blur, 40, 120)
     contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 
     ellipses: list[tuple[int, int, int, int, float]] = []
@@ -38,11 +38,11 @@ def detect_ellipses(
         (x, y), (MA, ma), angle = ellipse
 
         if not (
-            expected_d_px * 0.8 <= ma <= expected_d_px * 1.2
-            and expected_d_px * 0.8 <= MA <= expected_d_px * 1.4
+            expected_d_px * 0.75 <= ma <= expected_d_px * 1.25
+            and expected_d_px * 0.75 <= MA <= expected_d_px * 1.35
         ):
             continue
-        if abs(MA - ma) < 2:  # nearly circular; handled elsewhere
+        if abs(MA - ma) < 3:  # nearly circular; handled elsewhere
             continue
 
         ellipses.append(
