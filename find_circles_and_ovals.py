@@ -61,7 +61,7 @@ def detect_ellipses(
 
 
 def process_image(
-    image_path: str = "IMG_9503.JPG",
+    image_path: str = "04_unsharp.png",
 ) -> tuple[np.ndarray | None, np.ndarray | None, Path]:
     """Detect circles and ovals, overlay a grid and save an annotated image."""
 
