@@ -4,7 +4,7 @@ import numpy as np
 
 
 def find_center_circle(
-    image_path: str = "IMG_9503.JPG", physical_size_mm: float = 148.0
+    image_path: str = "clean_edges.JPG", physical_size_mm: float = 148.0
 ) -> tuple[int, int, int, float, np.ndarray] | None:
     """Estimate the circle around the image midpoint by scanning for edges.
 

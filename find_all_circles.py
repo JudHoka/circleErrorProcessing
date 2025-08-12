@@ -22,7 +22,7 @@ def draw_crosshair(
     cv2.line(img, (x, y - size), (x, y + size), color, 1)
 
 
-def process_image(image_path: str = "IMG_9503.JPG") -> tuple[np.ndarray, Path]:
+def process_image(image_path: str = "04_unsharp.png") -> tuple[np.ndarray, Path]:
     """Detect circles, overlay a grid and save an annotated image."""
 
     result = find_center_circle(image_path)
