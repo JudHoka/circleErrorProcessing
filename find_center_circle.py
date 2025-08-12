@@ -54,11 +54,11 @@ def find_center_circle(
         roi_blur,
         cv2.HOUGH_GRADIENT,
         dp=1.2,
-        minDist=20,
-        param1=100,
-        param2=20,
-        minRadius=5,
-        maxRadius=50,
+        minDist=18,
+        param1=90,
+        param2=18,
+        minRadius=4,
+        maxRadius=60,
     )
     if circles is None:
         return None
@@ -135,11 +135,11 @@ def detect_all_circles(
         opened,
         cv2.HOUGH_GRADIENT,
         dp=1.2,
-        minDist=int(cell_px * 0.9),
-        param1=150,
-        param2=60,
-        minRadius=int(expected_r_px * 0.9),
-        maxRadius=int(expected_r_px * 1.1),
+        minDist=int(cell_px * 0.8),
+        param1=120,
+        param2=40,
+        minRadius=int(expected_r_px * 0.85),
+        maxRadius=int(expected_r_px * 1.15),
     )
 
     if circles is not None:
