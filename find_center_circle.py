@@ -128,16 +128,18 @@ def detect_all_circles(
     cell_px = cell_mm / mm_per_pixel
     expected_r_px = (1.5) / mm_per_pixel  # 3 mm diameter -> 1.5 mm radius
 
-    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    blur = cv2.GaussianBlur(gray, (9, 9), 0)
+    kernel = np.ones((3, 3), np.uint8)
+    opened = cv2.morphologyEx(blur, cv2.MORPH_OPEN, kernel)
     circles = cv2.HoughCircles(
-        blur,
+        opened,
         cv2.HOUGH_GRADIENT,
         dp=1.2,
-        minDist=int(cell_px * 0.6),
-        param1=100,
-        param2=25,
-        minRadius=int(expected_r_px * 0.6),
-        maxRadius=int(expected_r_px * 1.4),
+        minDist=int(cell_px * 0.9),
+        param1=150,
+        param2=60,
+        minRadius=int(expected_r_px * 0.9),
+        maxRadius=int(expected_r_px * 1.1),
     )
 
     if circles is not None:
