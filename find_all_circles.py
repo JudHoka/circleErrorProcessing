@@ -35,16 +35,19 @@ def find_all_circles(image_path: str = "IMG_9503.JPG") -> tuple[np.ndarray, Path
         raise FileNotFoundError(f"{image_path} not found")
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    # Apply a stronger blur and morphological opening to suppress noisy edges
+    blurred = cv2.GaussianBlur(gray, (9, 9), 2)
+    kernel = np.ones((3, 3), np.uint8)
+    processed = cv2.morphologyEx(blurred, cv2.MORPH_OPEN, kernel)
     circles = cv2.HoughCircles(
-        blur,
+        processed,
         cv2.HOUGH_GRADIENT,
         dp=1.2,
-        minDist=20,
+        minDist=50,
         param1=100,
-        param2=30,
-        minRadius=5,
-        maxRadius=80,
+        param2=60,
+        minRadius=10,
+        maxRadius=40,
     )
 
     if circles is not None:
