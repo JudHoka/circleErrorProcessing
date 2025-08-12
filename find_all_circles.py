@@ -34,18 +34,19 @@ def process_image(image_path: str = "IMG_9503.JPG") -> tuple[np.ndarray, Path]:
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     circles = detect_all_circles(gray, mm_per_pixel)
 
+    # Draw the grid first so circle overlays remain visible
+    draw_grid(img, (cx, cy), mm_per_pixel)
+
     if circles is None:
         circles = np.empty((0, 3), dtype=int)
     else:
         for x, y, rad in circles:
-            draw_crosshair(img, (x, y))
             cv2.circle(img, (x, y), rad, (0, 0, 255), 1)
+            draw_crosshair(img, (x, y))
 
-    # Ensure the detected centre circle is highlighted
-    draw_crosshair(img, (cx, cy))
+    # Ensure the detected centre circle is highlighted on top of the grid
     cv2.circle(img, (cx, cy), r, (0, 0, 255), 1)
-
-    draw_grid(img, (cx, cy), mm_per_pixel)
+    draw_crosshair(img, (cx, cy))
 
     output_dir = Path.home() / "downloads"
     output_dir.mkdir(parents=True, exist_ok=True)
