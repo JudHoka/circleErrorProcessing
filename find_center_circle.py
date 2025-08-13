@@ -4,7 +4,7 @@ import numpy as np
 
 
 def find_center_circle(
-    image_path: str = "clean_edges.JPG", physical_size_mm: float = 148.0
+    image_path: str = "circles_modified.jpg", physical_size_mm: float = 148.0
 ) -> tuple[int, int, int, float, np.ndarray] | None:
     """Estimate the circle around the image midpoint by scanning for edges.
 
@@ -54,11 +54,11 @@ def find_center_circle(
         roi_blur,
         cv2.HOUGH_GRADIENT,
         dp=1.2,
-        minDist=18,
-        param1=90,
-        param2=18,
-        minRadius=4,
-        maxRadius=60,
+        minDist=20,
+        param1=100,
+        param2=20,
+        minRadius=5,
+        maxRadius=10,
     )
     if circles is None:
         return None
@@ -83,8 +83,8 @@ def draw_grid(
     img: np.ndarray,
     center: tuple[int, int],
     mm_per_pixel: float,
-    cell_mm: float = 4.0,
-    offset_mm: float = 2.0,
+    cell_mm: float = 4.5,
+    offset_mm: float = 2.25,
 ) -> None:
     """Overlay a square grid on ``img`` centred around ``center``.
 
@@ -128,18 +128,16 @@ def detect_all_circles(
     cell_px = cell_mm / mm_per_pixel
     expected_r_px = (1.5) / mm_per_pixel  # 3 mm diameter -> 1.5 mm radius
 
-    blur = cv2.GaussianBlur(gray, (9, 9), 0)
-    kernel = np.ones((3, 3), np.uint8)
-    opened = cv2.morphologyEx(blur, cv2.MORPH_OPEN, kernel)
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
     circles = cv2.HoughCircles(
-        opened,
+        blur,
         cv2.HOUGH_GRADIENT,
         dp=1.2,
-        minDist=int(cell_px * 0.8),
-        param1=120,
-        param2=40,
-        minRadius=int(expected_r_px * 0.85),
-        maxRadius=int(expected_r_px * 1.15),
+        minDist=int(cell_px * 0.6),
+        param1=100,
+        param2=25,
+        minRadius=int(expected_r_px * 0.6),
+        maxRadius=int(expected_r_px * 1.4),
     )
 
     if circles is not None:
