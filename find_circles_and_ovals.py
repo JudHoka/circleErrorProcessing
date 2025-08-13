@@ -19,7 +19,7 @@ def draw_crosshair(
 
 
 def detect_ellipses(
-    gray: np.ndarray, mm_per_pixel: float, cell_mm: float = 4.0
+    gray: np.ndarray, mm_per_pixel: float, cell_mm: float = 4.5
 ) -> np.ndarray | None:
     """Detect ovals (ellipses) in ``gray`` using contour fitting."""
 
@@ -89,8 +89,8 @@ def process_image(
             draw_crosshair(img, (int(x), int(y)))
 
     # Highlight centre circle on top of the grid
-    cv2.circle(img, (cx, cy), r, (0, 0, 255), 1)
-    draw_crosshair(img, (cx, cy))
+    cv2.circle(img, (cx, cy), r, (0, 255, 255), 1)
+    draw_crosshair(img, (cx, cy), color=(0, 255, 255))
 
     output_dir = Path.home() / "downloads"
     output_dir.mkdir(parents=True, exist_ok=True)

@@ -45,8 +45,8 @@ def process_image(image_path: str = "04_unsharp.png") -> tuple[np.ndarray, Path]
             draw_crosshair(img, (x, y))
 
     # Ensure the detected centre circle is highlighted on top of the grid
-    cv2.circle(img, (cx, cy), r, (0, 0, 255), 1)
-    draw_crosshair(img, (cx, cy))
+    cv2.circle(img, (cx, cy), r, (0, 255, 255), 1)
+    draw_crosshair(img, (cx, cy), color=(0, 255, 255))
 
     output_dir = Path.home() / "downloads"
     output_dir.mkdir(parents=True, exist_ok=True)
