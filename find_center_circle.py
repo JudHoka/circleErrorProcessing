@@ -111,7 +111,7 @@ def draw_grid(
 
 
 def detect_all_circles(
-    gray: np.ndarray, mm_per_pixel: float, cell_mm: float = 4.0
+    gray: np.ndarray, mm_per_pixel: float, cell_mm: float = 4.5
 ) -> np.ndarray | None:
     """Detect all circles in ``gray`` using Hough transform.
 
@@ -133,11 +133,11 @@ def detect_all_circles(
         blur,
         cv2.HOUGH_GRADIENT,
         dp=1.2,
-        minDist=int(cell_px * 0.6),
-        param1=100,
-        param2=25,
-        minRadius=int(expected_r_px * 0.6),
-        maxRadius=int(expected_r_px * 1.4),
+        minDist=int(cell_px * 0.9),
+        param1=120,
+        param2=50,
+        minRadius=int(expected_r_px * 0.85),
+        maxRadius=int(expected_r_px * 1.15),
     )
 
     if circles is not None:
@@ -149,7 +149,7 @@ def compute_offsets(
     circles: np.ndarray,
     center: tuple[int, int],
     mm_per_pixel: float,
-    cell_mm: float = 4.0,
+    cell_mm: float = 4.5,
 ) -> list[dict[str, float | str | int]]:
     """Compute positional offsets of circles from their ideal grid points."""
 
